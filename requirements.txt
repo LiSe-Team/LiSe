@@ -1,0 +1,5 @@
+connexion>=2.7.0
+firebase>=3.0.1
+firebase-admin>=4.5.1
+simpleNDB>=1.0.6
+Flask-Cors>=3.0.10

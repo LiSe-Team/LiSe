@@ -1,0 +1,99 @@
+openapi: 3.0.0
+info:
+    title: LiSe
+    version: '1.0'
+components:
+    securitySchemes:
+      jwt:
+        type: http
+        scheme: bearer
+        bearerFormat: JWT
+        x-bearerInfoFunc: api.auth_api.AuthApi.decode_token
+security:
+    - jwt: []
+servers:
+    - url: /_ah/api
+paths:
+    /fetch_user:
+        post:
+            operationId: api.UserApi.fetch_user
+            responses:
+                200:
+                    description: Fetch the user data
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+
+    /get_key:
+        post:
+            operationId: api.KeyApi.get_key
+            security:
+                - {}
+            requestBody:
+                description: key details
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                              - product_id
+                              - instance_code
+                              - instance_type
+                              - auth_code
+                              - auth_type
+                            properties:
+                                product_id:
+                                    type: number
+                                instance_id:
+                                    type: string
+                                instance_type:
+                                    type: number
+                                auth_id:
+                                    type: string
+                                auth_type:
+                                    type: number
+            responses:
+                200:
+                    description: get a new key for a user entity
+                    content:
+                        application/json:
+                          schema:
+                            type: object
+                            required:
+                                - signature
+                                - token
+                            properties:
+                                signature:
+                                    type: string
+                                token:
+                                    type: string
+                            
+    /validate_key:
+        post:
+            operationId: api.KeyApi.validate_key
+            security:
+                - {}
+            requestBody:
+                description: key details
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                              - token
+                              - signature
+                            properties:
+                              token:
+                                  type: string
+                              signature:
+                                  type: string
+            responses:
+                200:
+                    description: get a new key for a user entity
+                    content:
+                        application/json:
+                          schema:
+                            type: object
