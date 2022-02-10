@@ -92,7 +92,7 @@ class Licence(Model):
 
     def schema(self):
         super().schema()
-        # produt for which this is a licence key
+        # product for which this is a licence key
         self.Property('product', ndb.KeyProperty, kind = Product)
         # Integer showing the licence type
         self.Property('access_level', ndb.IntegerProperty)
@@ -100,6 +100,10 @@ class Licence(Model):
         self.Property('auth_code', ndb.StringProperty)
         # Type of the auth code
         self.Property('auth_type', ndb.IntegerProperty)
+        
+    def __init__(self, product, *args, **kwargs):
+        super(Licence, self).__init__(*args, **kwargs)
+        self.product = product.get_key()
 
 
 class Usage(Model):
@@ -154,22 +158,21 @@ class Usage(Model):
         """
         Find a Usage instance based on the info passed from the client
         """
-        _use = Usage.query(filters = [
+        _key = Licence.query(filters = [
             ("product", "=", Product.Key(product_id)),
+            ("auth_code", "=", auth_code),
+            ("auth_type", "=", auth_type)
+        ]
+        ).get()
+        if _key:
+            _use = Usage.query(filters = [
+            ("licence", "=", _key.get_key()),
             ("instance_code", "=", instance_code),
             ("instance_type", "=", instance_type)
         ]
         ).get()
-        if _use:
-            return _use.sign()
-        _key = Licence.query(filters = [
-            ("product", "=", Product.Key(product_id)),
-            # this should be user id from the auth interface
-            ("auth_code", "=", instance_code),
-            ("auth_type", "=", instance_type)
-        ]
-        ).get()
-        if _key:
+            if _use:
+                return _use.sign()            
             _use = Usage(
                 _key,
                 instance_code = instance_code,
@@ -177,10 +180,10 @@ class Usage(Model):
             )
             _use.put()
             return _use.sign()
-        product: Product = Product.get_by_id(product_id)
-        if product.allows_free:
+        _product: Product = Product.get_by_id(product_id)
+        if _product.allows_free:
             _key = Licence(
-                product = product.get_key(),
+                product = _product,
                 auth_code = auth_code,
                 auth_type = auth_type
             )

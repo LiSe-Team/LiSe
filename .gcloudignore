@@ -23,3 +23,4 @@ venv/
 node_modules/
 lib/
 console/
+*.json
